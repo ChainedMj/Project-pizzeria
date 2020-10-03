@@ -53,6 +53,21 @@
   };
 
   const app = {
+    initMenu: function(){
+      const thisApp = this;
+      console.log('thisApp.data:',thisApp.data);
+      for(let productData in  thisApp.data.products){
+        new Product(productData, thisApp.data.products[productData]);
+      }
+    },
+
+    
+
+    initData: function(){
+      const thisApp = this;
+      thisApp.data = dataSource;
+    },
+
     init: function(){
       const thisApp = this;
       console.log('*** App starting ***');
@@ -60,13 +75,47 @@
       console.log('classNames:', classNames);
       console.log('settings:', settings);
       console.log('templates:', templates);
+      thisApp.initData();
+
+
+      thisApp.initMenu();
     },
   };
   class Product{
-    constructor(){
+    constructor(id, data){
       const thisProduct = this;
 
+      thisProduct.id =id;
+      thisProduct.data =data;
+      thisProduct.renderInMenu();
+      thisProduct.initAccordion();
       console.log('new Product:',thisProduct);
+    }
+    renderInMenu(){
+      const thisProduct =this;
+      /*generate HTML based on template*/
+      const generatedHTML = templates.menuProduct(thisProduct.data);
+      /* crate element  using  utils.crateElementfromHTML */
+      thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+      /* find menu container */
+      const menuContainer = document.querySelector(select.containerOf.menu);
+      /* add element to menu */
+      menuContainer.appendChild(thisProduct.element);
+    }
+    initAccordion(){
+      const thisProduct = this;
+      /* find the clickable trigger (the element that should react to clicking) */
+      const clickable = thisProduct.element.querySelector(select.menuProduct.clickable);
+      /* START: click event listener to trigger */
+      clickable.addEventListener('click', function(event){
+        event.preventDefault();
+        thisProduct.element.classList.toggle('active');
+        const activearticles = document.querySelectorAll(select.all.menuProductsActive);
+        for(let article of activearticles){
+          if (article != thisProduct.element)article.classList.remove('active');
+        }
+        console.log('clicked');
+      });
     }
   }
   app.init();
